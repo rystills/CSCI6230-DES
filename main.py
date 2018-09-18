@@ -2,6 +2,7 @@
 initialPermutation = [2,6,3,1,4,8,5,7]
 keyPermutation = [3,5,2,7,4,10,1,9,8,6]
 KeyPermutation8Bit = [6,3,7,4,8,5,10,9]
+inverseInitialPermutation = [4,1,3,5,7,2,8,6]
 
 #utility methods from https://stackoverflow.com/questions/10237926/convert-string-to-list-of-bits-and-viceversa
 def tobits(s):
@@ -58,12 +59,37 @@ def encrypt(bits,key):
     rkey.pop(0)
     rkey.append(0)
     
-    #6. recombine into 8 bit key
+    #6. recombine into 8 bit key k1
     k1 = [0,0,0,0,0,0,0,0]
     for i in range(len(k1)):
         k1[i] = lkey[KeyPermutation8Bit[i]-1] if KeyPermutation8Bit[i]-1 < 5 else rkey[KeyPermutation8Bit[i]-1-5]
     
-    return encBits
+    #7. call F with k1
+    F(lbits,rbits,k1)
+    
+    #8. split k1
+    lk1 = k1[:4]
+    rk1 = k1[4:]
+    
+    #9. left shift k1 halves
+    lk1.pop(0)
+    lk1.append(0)
+    rk1.pop(0)
+    rk1.append(0)
+    
+    #10. recombine into 8 bit key k2
+    k2 = lk1 + rk1
+    
+    #11. call F with k2
+    F(lbits,rbits,k2)
+    
+    #12. apply inverse permutation
+    bitsFinal = [0,0,0,0,0,0,0,0]
+    for i in range(len(bitsFinal)):
+        bitsFinal[i] = lbits[inverseInitialPermutation[i]-1] if inverseInitialPermutation[i]-1 < 4 else rbits[inverseInitialPermutation[i]-1-4]
+    
+    #done
+    return bitsFinal
 
 def encryptExt(bitArr,bitKey):
     encBits = []

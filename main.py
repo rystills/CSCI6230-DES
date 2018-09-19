@@ -9,7 +9,7 @@ S0 = [[1,0,3,2],[3,2,1,0],[0,2,1,3],[3,1,3,2]]
 S1 = [[0,1,2,3],[2,0,1,3],[3,0,1,0],[2,1,0,3]]
 
 def main():
-    testString = "secret"
+    testString = "big secret"
     testKey = [0,0,1,0,1,1,0,1,0,1]
     print(frombits(decrypt(encrypt(tobits(testString),testKey),testKey)))
 
@@ -104,9 +104,9 @@ def DES(bits,key):
         xorlbits = xorbits[:4]
         xorrbits = xorbits[4:]
         
-        #4. index into s-boxes, and convert the resulting into back into binary
-        lsbits = "{0:b}".format(S0[xorlbits[0]*2 + xorlbits[3]][xorlbits[1]*2 + xorlbits[2]])
-        rsbits = "{0:b}".format(S1[xorrbits[0]*2 + xorrbits[3]][xorrbits[1]*2 + xorrbits[2]])
+        #4. index into s-boxes, and convert the resulting into back into binary, left-padding with a 0 if necessary
+        lsbits = list(("0" + "{0:b}".format(S0[xorlbits[0]*2 + xorlbits[3]][xorlbits[1]*2 + xorlbits[2]]))[-2:])
+        rsbits = list(("0" + "{0:b}".format(S1[xorrbits[0]*2 + xorrbits[3]][xorrbits[1]*2 + xorrbits[2]]))[-2:])
         
         #5. recombine and permutate
         recombinedBits = [0,0,0,0]
@@ -143,7 +143,7 @@ def DES(bits,key):
     #6. recombine into 8 bit key k1
     k1 = [0,0,0,0,0,0,0,0]
     for i in range(len(k1)):
-        k1[i] = lkey[KeyPermutation8Bit[i]-1] if KeyPermutation8Bit[i]-1 < 4 else rkey[KeyPermutation8Bit[i]-1-4]
+        k1[i] = lkey[KeyPermutation8Bit[i]-1] if KeyPermutation8Bit[i]-1 < 5 else rkey[KeyPermutation8Bit[i]-1-5]
     
     #7. call F with k1, then xor with lbits
     Fval1 = xor(F(rbits,k1),lbits); 

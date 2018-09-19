@@ -8,7 +8,7 @@ FRecombinePermutation = [2,4,3,1]
 S0 = [[1,0,3,2],[3,2,1,0],[0,2,1,3],[3,1,3,2]]
 S1 = [[0,1,2,3],[2,0,1,3],[3,0,1,0],[2,1,0,3]]
 
-def main():
+def stringTest():
     testString = "big secret"
     testKey = [0,0,1,0,1,1,0,1,0,1]
     encrypedTest = (encrypt(tobits(testString),testKey))
@@ -17,6 +17,31 @@ def main():
     print("input key: {0}".format(testKey))
     print("encrypted bit array: {0}".format(encrypedTest))
     print("final value: {0}".format(decryptedTest))
+
+def bitTest():
+    inBits = [1,0,1,1,0,1,0,1]
+    inKey = [1,1,1,0,0,0,1,1,1,0]
+    encrypted = encrypt(inBits,inKey)
+    print("input:     {0}".format(inBits))
+    print("key:       {0}".format(inKey))
+    print("encrypted: {0}".format(encrypted))
+    decrypted = encrypt(encrypted,inKey)
+    print("decrypted: {0}".format(decrypted))
+
+def xorTest():
+    a = [1,1,1,1,1,0,0]
+    b = [1,1,0,0,1,1,0]
+    print("array a: {0}".format(a))
+    print("array b: {0}".format(b))
+    print("result: {0}".format(xor(a,b)))
+
+def main():
+    print("~string test~")
+    stringTest()
+    print("~bit test~")
+    bitTest()
+    print("~xor test~")
+    xorTest()
 
 #utility method from https://stackoverflow.com/questions/10237926/convert-string-to-list-of-bits-and-viceversa
 """
@@ -54,7 +79,7 @@ create a new list of bits containing the result of an exclusive or on the input 
 def xor(l1,l2):
     newList = []
     for i in range(len(l1)):
-        newList.insert(0, 1 if (l1[i] == 1 or l2[i] == 1) and (l1[i] != l2[i]) else 0)
+        newList.append(1 if (l1[i] == 1 or l2[i] == 1) and (l1[i] != l2[i]) else 0)
     return newList
 
 """

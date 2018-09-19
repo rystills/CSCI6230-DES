@@ -11,7 +11,12 @@ S1 = [[0,1,2,3],[2,0,1,3],[3,0,1,0],[2,1,0,3]]
 def main():
     testString = "big secret"
     testKey = [0,0,1,0,1,1,0,1,0,1]
-    print(frombits(decrypt(encrypt(tobits(testString),testKey),testKey)))
+    encrypedTest = (encrypt(tobits(testString),testKey))
+    decryptedTest = frombits(decrypt(encrypedTest,testKey))
+    print("input value: {0}".format(testString))
+    print("input key: {0}".format(testKey))
+    print("encrypted bit array: {0}".format(encrypedTest))
+    print("final value: {0}".format(decryptedTest))
 
 #utility method from https://stackoverflow.com/questions/10237926/convert-string-to-list-of-bits-and-viceversa
 """

@@ -18,6 +18,7 @@ def stringTest():
     print("input as bits:       {0}".format(tobits(testString)))
     print("input key:           {0}".format(testKey))
     print("encrypted bit array: {0}".format(encrypedTest))
+    print("decrypted bit array: {0}".format(decrypt(encrypedTest,testKey)))
     print("final value:         {0}".format(decryptedTest))
 
 def bitTest():
@@ -40,10 +41,11 @@ def xorTest():
     print("result:  {0}".format(xor(a,b)))
 
 def main():
-    #stringTest()
+    stringTest()
     #bitTest()
     #xorTest()
-    print(encrypt([1,0,1,1,0,1,0,1],[1,1,1,0,0,0,1,1,1,0]))
+    #print(encrypt([1,0,1,1,0,1,0,1],[1,1,1,0,0,0,1,1,1,0]))
+    #print(encrypt([1,0,0,0,1,0,0,1],[1,0,1,1,1,1,0,1,0,0]))
 
 #utility method from https://stackoverflow.com/questions/10237926/convert-string-to-list-of-bits-and-viceversa
 """
@@ -94,7 +96,7 @@ def decrypt(bitArr,bitKey):
     decBits = []
     for i in range(0,len(bitArr),8):
         #we can use encrypt when going in either direction, as long as we implemented DES correctly
-        decBits += DES(bitArr[i:i+8],bitKey)
+        decBits += DES(bitArr[i:i+8],bitKey,False)
     return decBits
 
 """
@@ -114,9 +116,10 @@ def encrypt(bitArr,bitKey):
 core DES encryption/decryption method
 @param bits: the 8 bit array to encrypt
 @param key: the encryption key to use
+@param encrypting: whether to encrypt (true) or decrypt (false)
 @return: the result of encrypting/decrypting the input but array using the input key
 """ 
-def DES(bits,key):
+def DES(bits,key, encrypting = True):
     """
     DES helper method; scrambles input bits using S-boxes and input key
     @param bits: the 4 bit array
@@ -153,8 +156,6 @@ def DES(bits,key):
     for i in range(len(encBits)):
         encBits[i] = bits[initialPermutation[i]-1]
         
-    print(encBits)
-    
     #2. split bits
     lbits = encBits[:4]
     rbits = encBits[4:]
@@ -180,28 +181,22 @@ def DES(bits,key):
     for i in range(len(k1)):
         k1[i] = lkey[KeyPermutation8Bit[i]-1] if KeyPermutation8Bit[i]-1 < 5 else rkey[KeyPermutation8Bit[i]-1-5]
     
-    #7. call F with k1, then xor with lbits
-    print("a")
-    print(k1)
-    print(F(rbits,k1))
-    print("b")
-    print(lbits)
-    Fval1 = xor(F(rbits,k1),lbits)
-    print(Fval1)
-    
-    #8. left shift k1 halves
+    #7. left shift k1 halves
     lkey.pop(0)
     lkey.append(0)
     rkey.pop(0)
     rkey.append(0)
     
-    #9. recombine into 8 bit key k2
+    #8. recombine into 8 bit key k2
     k2 = [0,0,0,0,0,0,0,0]
     for i in range(len(k2)):
         k2[i] = lkey[KeyPermutation8Bit[i]-1] if KeyPermutation8Bit[i]-1 < 5 else rkey[KeyPermutation8Bit[i]-1-5]
+        
+    #9. call F with k1, then xor with lbits
+    Fval1 = xor(F(rbits,k1 if encrypting else k2),lbits)
     
     #10. call F with k2, then xor with rbits
-    Fval2 = xor(F(Fval1,k2),rbits);
+    Fval2 = xor(F(Fval1,k2 if encrypting else k1),rbits);
     
     #11. apply inverse initial permutation on the concatenation of our second result with our first result
     bitsFinal = [0,0,0,0,0,0,0,0]

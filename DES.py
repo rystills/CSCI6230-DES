@@ -1,16 +1,8 @@
-#DES constants
-initialPermutation = [2,6,3,1,4,8,5,7]
-keyPermutation = [3,5,2,7,4,10,1,9,8,6]
-KeyPermutation8Bit = [6,3,7,4,8,5,10,9]
-inverseInitialPermutation = [4,1,3,5,7,2,8,6]
-FExpandPermutation = [4,1,2,3,2,3,4,1]
-FRecombinePermutation = [2,4,3,1]
-S0 = [[1,0,3,2],[3,2,1,0],[0,2,1,3],[3,1,3,2]]
-S1 = [[0,1,2,3],[2,0,1,3],[3,0,1,0],[2,1,0,3]]
-
+import sys 
+#test methods; these can be safely ignored
 def stringTest():
     print("~string test~")
-    testString = "big secret"
+    testString = "to be determined"
     testKey = [0,0,1,0,1,1,0,1,0,1]
     encrypedTest = (encrypt(tobits(testString),testKey))
     decryptedTest = frombits(decrypt(encrypedTest,testKey))
@@ -41,11 +33,28 @@ def xorTest():
     print("result:  {0}".format(xor(a,b)))
 
 def main():
-    stringTest()
-    #bitTest()
-    #xorTest()
-    #print(encrypt([1,0,1,1,0,1,0,1],[1,1,1,0,0,0,1,1,1,0]))
-    #print(encrypt([1,0,0,0,1,0,0,1],[1,0,1,1,1,1,0,1,0,0]))
+    defaultKey = [1,1,1,0,0,0,1,1,1,0]
+    #usage check
+    if (len(sys.argv) != 4) or (not sys.argv[3] in ['-e','-d']):
+        print("Usage: DES.py inFileName outFileName [options]\n\nOptions:\n-e\tencrypt\n-d\tdecrypt")
+    #read file contents, erroring out if file does not exist
+    try:
+        with open(sys.argv[1], 'r') as f:
+            data = f.read()
+            for line in f:
+                print(line)
+    except:
+        print("Error: file not found",file=sys.stderr)
+        return
+    
+    #pass data into encryption/decryption method
+    bitArray = tobits(data) if sys.argv[3] == '-e' else [int(i) for i in list(data)]
+    result = encrypt(bitArray,defaultKey) if sys.argv[3] == '-e' else frombits(decrypt(bitArray, defaultKey))
+    
+    #write result to output file
+    with open(sys.argv[2], 'w') as f:
+        for i in result:
+            f.write(str(i))
 
 #utility method from https://stackoverflow.com/questions/10237926/convert-string-to-list-of-bits-and-viceversa
 """
@@ -120,6 +129,15 @@ core DES encryption/decryption method
 @return: the result of encrypting/decrypting the input but array using the input key
 """ 
 def DES(bits,key, encrypting = True):
+    #DES constants
+    initialPermutation = [2,6,3,1,4,8,5,7]
+    keyPermutation = [3,5,2,7,4,10,1,9,8,6]
+    KeyPermutation8Bit = [6,3,7,4,8,5,10,9]
+    inverseInitialPermutation = [4,1,3,5,7,2,8,6]
+    FExpandPermutation = [4,1,2,3,2,3,4,1]
+    FRecombinePermutation = [2,4,3,1]
+    S0 = [[1,0,3,2],[3,2,1,0],[0,2,1,3],[3,1,3,2]]
+    S1 = [[0,1,2,3],[2,0,1,3],[3,0,1,0],[2,1,0,3]]
     """
     DES helper method; scrambles input bits using S-boxes and input key
     @param bits: the 4 bit array

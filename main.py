@@ -1,10 +1,20 @@
-#constants
+#DES constants
 initialPermutation = [2,6,3,1,4,8,5,7]
 keyPermutation = [3,5,2,7,4,10,1,9,8,6]
 KeyPermutation8Bit = [6,3,7,4,8,5,10,9]
 inverseInitialPermutation = [4,1,3,5,7,2,8,6]
 
-#utility methods from https://stackoverflow.com/questions/10237926/convert-string-to-list-of-bits-and-viceversa
+def main():
+    testString = "secret"
+    testKey = [0,0,1,0,1,1,0,1,0,1]
+    print(frombits(decrypt(encrypt(tobits(testString),testKey),testKey)))
+
+#utility method from https://stackoverflow.com/questions/10237926/convert-string-to-list-of-bits-and-viceversa
+"""
+convert a string to a list of bits
+@param s: the string to convert
+@return: the bit list equivalent of s
+"""
 def tobits(s):
     result = []
     for c in s:
@@ -13,6 +23,12 @@ def tobits(s):
         result.extend([int(b) for b in bits])
     return result
 
+#utility method from https://stackoverflow.com/questions/10237926/convert-string-to-list-of-bits-and-viceversa
+"""
+convert a list of bits to a string
+@param bits: the list of bits to convert
+@return: the string equivalent of bits
+"""
 def frombits(bits):
     chars = []
     for b in range(len(bits) // 8):
@@ -20,21 +36,60 @@ def frombits(bits):
         chars.append(chr(int(''.join([str(bit) for bit in byte]), 2)))
     return ''.join(chars)
 
-def main():
-    testString = "secret"
-    testKey = [0,0,1,0,1,1,0,1,0,1]
-    print(frombits(decryptExt(encryptExt(tobits(testString),testKey),testKey)))
+"""
+create a new list of bits containing the result of an exclusive or on the input lists
+@param l1: the first list
+@param l2: the second list
+@return: the result of an exclusive or on l1 and l2
+"""
+def xor(l1,l2):
+    newList = []
+    for i in range(len(l1)):
+        newList.insert(0, 1 if (l1[i] == 1 or l2[i] == 1) and (l1[i] != l2[i]) else 0)
+    return newList
 
-def decrypt(bits,key):
-    return bits
-
-def decryptExt(bitArr,bitKey):
+"""
+external input method for toy DES decryption
+@param bitArr: the bit array to decrypt
+@param bitKey: the decryption key to use
+@return: the result of decrypting the input bit array using the input key
+""" 
+def decrypt(bitArr,bitKey):
     decBits = []
     for i in range(0,len(bitArr),8):
-        decBits += decrypt(bitArr[i:i+8],bitKey)
+        #we can use encrypt when going in either direction, as long as we implemented DES correctly
+        decBits += DES(bitArr[i:i+8],bitKey)
     return decBits
 
-def encrypt(bits,key):
+"""
+external input method for toy DES encryption
+@param bitArr: the bit array to encrypt
+@param bitKey: the encryption key to use
+@return: the result of encrypting the input bit array using the input key
+""" 
+
+def encrypt(bitArr,bitKey):
+    encBits = []
+    for i in range(0,len(bitArr),8):
+        encBits += DES(bitArr[i:i+8],bitKey)
+    return encBits
+
+"""
+core DES encryption/decryption method
+@param bits: the 8 bit array to encrypt
+@param key: the encryption key to use
+@return: the result of encrypting/decrypting the input but array using the input key
+""" 
+def DES(bits,key):
+    """
+    DES helper method; scrambles input bits using S-boxes and input key
+    @param bits: the 4 bit array
+    @param key: the 8 bit key
+    @return: the result of manipulating the input bits using the input key
+    """ 
+    def F(bitArr,keyArr):
+        pass
+    
     #1. apply initial permutation
     encBits = [0,0,0,0,0,0,0,0]
     for i in range(len(encBits)):
@@ -64,8 +119,8 @@ def encrypt(bits,key):
     for i in range(len(k1)):
         k1[i] = lkey[KeyPermutation8Bit[i]-1] if KeyPermutation8Bit[i]-1 < 5 else rkey[KeyPermutation8Bit[i]-1-5]
     
-    #7. call F with k1
-    F(lbits,rbits,k1)
+    #7. call F with k1, then xor with lbits
+    Fval1 = xor(F(rbits,k1),lbits); 
     
     #8. split k1
     lk1 = k1[:4]
@@ -80,22 +135,16 @@ def encrypt(bits,key):
     #10. recombine into 8 bit key k2
     k2 = lk1 + rk1
     
-    #11. call F with k2
-    F(lbits,rbits,k2)
+    #11. call F with k2, then xor with rbits
+    Fval2 = xor(F(Fval1,k2),rbits);
     
-    #12. apply inverse permutation
+    #12. apply inverse permutation on the concatenation of our seecond result with our first result
     bitsFinal = [0,0,0,0,0,0,0,0]
     for i in range(len(bitsFinal)):
-        bitsFinal[i] = lbits[inverseInitialPermutation[i]-1] if inverseInitialPermutation[i]-1 < 4 else rbits[inverseInitialPermutation[i]-1-4]
+        bitsFinal[i] = Fval2[inverseInitialPermutation[i]-1] if inverseInitialPermutation[i]-1 < 4 else Fval1[inverseInitialPermutation[i]-1-4]
     
     #done
     return bitsFinal
-
-def encryptExt(bitArr,bitKey):
-    encBits = []
-    for i in range(0,len(bitArr),8):
-        encBits += encrypt(bitArr[i:i+8],bitKey)
-    return encBits
 
 if __name__ == "__main__":
     main()

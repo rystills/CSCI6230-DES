@@ -124,7 +124,6 @@ def DES(bits,key):
     @return: the result of manipulating the input bits using the input key
     """ 
     def F(bitArr,keyArr):
-        print("K: {0}".format(keyArr))
         #1. expand/permutate bit array
         expandedBits = [0,0,0,0,0,0,0,0]
         for i in range(len(expandedBits)):
@@ -138,8 +137,8 @@ def DES(bits,key):
         xorrbits = xorbits[4:]
         
         #4. index into s-boxes, and convert the resulting into back into binary, left-padding with a 0 if necessary
-        lsbits = list(("0" + "{0:b}".format(S0[xorlbits[0]*2 + xorlbits[3]][xorlbits[1]*2 + xorlbits[2]]))[-2:])
-        rsbits = list(("0" + "{0:b}".format(S1[xorrbits[0]*2 + xorrbits[3]][xorrbits[1]*2 + xorrbits[2]]))[-2:])
+        lsbits = [int(i) for i in list(("0" + "{0:b}".format(S0[xorlbits[0]*2 + xorlbits[3]][xorlbits[1]*2 + xorlbits[2]]))[-2:])]
+        rsbits = [int(i) for i in list(("0" + "{0:b}".format(S1[xorrbits[0]*2 + xorrbits[3]][xorrbits[1]*2 + xorrbits[2]]))[-2:])]
         
         #5. recombine and permutate
         recombinedBits = [0,0,0,0]
@@ -153,6 +152,8 @@ def DES(bits,key):
     encBits = [0,0,0,0,0,0,0,0]
     for i in range(len(encBits)):
         encBits[i] = bits[initialPermutation[i]-1]
+        
+    print(encBits)
     
     #2. split bits
     lbits = encBits[:4]
@@ -162,12 +163,10 @@ def DES(bits,key):
     keyBits = [0,0,0,0,0,0,0,0,0,0]
     for i in range(len(keyBits)):
         keyBits[i] = key[keyPermutation[i]-1]
-    print(keyBits)
     
     #4. split key
     lkey = keyBits[:5]
     rkey = keyBits[5:]
-    print("left {0} right {1}".format(lkey,rkey))
 
     
     #5. left shift key halves
@@ -175,7 +174,6 @@ def DES(bits,key):
     lkey.append(0)
     rkey.pop(0)
     rkey.append(0)
-    print("left {0} right {1}".format(lkey,rkey))
     
     #6. recombine into 8 bit key k1
     k1 = [0,0,0,0,0,0,0,0]
@@ -183,7 +181,13 @@ def DES(bits,key):
         k1[i] = lkey[KeyPermutation8Bit[i]-1] if KeyPermutation8Bit[i]-1 < 5 else rkey[KeyPermutation8Bit[i]-1-5]
     
     #7. call F with k1, then xor with lbits
+    print("a")
+    print(k1)
+    print(F(rbits,k1))
+    print("b")
+    print(lbits)
     Fval1 = xor(F(rbits,k1),lbits)
+    print(Fval1)
     
     #8. left shift k1 halves
     lkey.pop(0)

@@ -3,6 +3,10 @@ initialPermutation = [2,6,3,1,4,8,5,7]
 keyPermutation = [3,5,2,7,4,10,1,9,8,6]
 KeyPermutation8Bit = [6,3,7,4,8,5,10,9]
 inverseInitialPermutation = [4,1,3,5,7,2,8,6]
+FExpandPermutation = [4,1,2,3,2,3,4,1]
+FRecombinePermutation = [2,4,3,1]
+S0 = [[1,0,3,2],[3,2,1,0],[0,2,1,3],[3,1,3,2]]
+S1 = [[0,1,2,3],[2,0,1,3],[3,0,1,0],[2,1,0,3]]
 
 def main():
     testString = "secret"
@@ -88,7 +92,29 @@ def DES(bits,key):
     @return: the result of manipulating the input bits using the input key
     """ 
     def F(bitArr,keyArr):
-        pass
+        #1. expand/permutate bit array
+        expandedBits = [0,0,0,0,0,0,0,0]
+        for i in range(len(expandedBits)):
+            expandedBits[i] = bitArr[FExpandPermutation[i]-1]
+            
+        #2. xor with key
+        xorbits = xor(expandedBits,keyArr)
+        
+        #3. split xor list into 2 4-bit lists
+        xorlbits = xorbits[:4]
+        xorrbits = xorbits[4:]
+        
+        #4. index into s-boxes, and convert the resulting into back into binary
+        lsbits = "{0:b}".format(S0[xorlbits[0]*2 + xorlbits[3]][xorlbits[1]*2 + xorlbits[2]])
+        rsbits = "{0:b}".format(S1[xorrbits[0]*2 + xorrbits[3]][xorrbits[1]*2 + xorrbits[2]])
+        
+        #5. recombine and permutate
+        recombinedBits = [0,0,0,0]
+        for i in range(len(recombinedBits)):
+            recombinedBits[i] = lsbits[FRecombinePermutation[i]-1] if FRecombinePermutation[i]-1 < 2 else rsbits[FRecombinePermutation[i]-1-2]
+        
+        #done
+        return recombinedBits
     
     #1. apply initial permutation
     encBits = [0,0,0,0,0,0,0,0]
@@ -117,7 +143,7 @@ def DES(bits,key):
     #6. recombine into 8 bit key k1
     k1 = [0,0,0,0,0,0,0,0]
     for i in range(len(k1)):
-        k1[i] = lkey[KeyPermutation8Bit[i]-1] if KeyPermutation8Bit[i]-1 < 5 else rkey[KeyPermutation8Bit[i]-1-5]
+        k1[i] = lkey[KeyPermutation8Bit[i]-1] if KeyPermutation8Bit[i]-1 < 4 else rkey[KeyPermutation8Bit[i]-1-4]
     
     #7. call F with k1, then xor with lbits
     Fval1 = xor(F(rbits,k1),lbits); 
@@ -138,7 +164,7 @@ def DES(bits,key):
     #11. call F with k2, then xor with rbits
     Fval2 = xor(F(Fval1,k2),rbits);
     
-    #12. apply inverse permutation on the concatenation of our seecond result with our first result
+    #12. apply inverse initial permutation on the concatenation of our second result with our first result
     bitsFinal = [0,0,0,0,0,0,0,0]
     for i in range(len(bitsFinal)):
         bitsFinal[i] = Fval2[inverseInitialPermutation[i]-1] if inverseInitialPermutation[i]-1 < 4 else Fval1[inverseInitialPermutation[i]-1-4]

@@ -9,16 +9,19 @@ S0 = [[1,0,3,2],[3,2,1,0],[0,2,1,3],[3,1,3,2]]
 S1 = [[0,1,2,3],[2,0,1,3],[3,0,1,0],[2,1,0,3]]
 
 def stringTest():
+    print("~string test~")
     testString = "big secret"
     testKey = [0,0,1,0,1,1,0,1,0,1]
     encrypedTest = (encrypt(tobits(testString),testKey))
     decryptedTest = frombits(decrypt(encrypedTest,testKey))
-    print("input value: {0}".format(testString))
-    print("input key: {0}".format(testKey))
+    print("input value:         {0}".format(testString))
+    print("input as bits:       {0}".format(tobits(testString)))
+    print("input key:           {0}".format(testKey))
     print("encrypted bit array: {0}".format(encrypedTest))
-    print("final value: {0}".format(decryptedTest))
+    print("final value:         {0}".format(decryptedTest))
 
 def bitTest():
+    print("~bit test~")
     inBits = [1,0,1,1,0,1,0,1]
     inKey = [1,1,1,0,0,0,1,1,1,0]
     encrypted = encrypt(inBits,inKey)
@@ -29,19 +32,18 @@ def bitTest():
     print("decrypted: {0}".format(decrypted))
 
 def xorTest():
+    print("~xor test~")
     a = [1,1,1,1,1,0,0]
     b = [1,1,0,0,1,1,0]
     print("array a: {0}".format(a))
     print("array b: {0}".format(b))
-    print("result: {0}".format(xor(a,b)))
+    print("result:  {0}".format(xor(a,b)))
 
 def main():
-    print("~string test~")
-    stringTest()
-    print("~bit test~")
-    bitTest()
-    print("~xor test~")
-    xorTest()
+    #stringTest()
+    #bitTest()
+    #xorTest()
+    print(encrypt([1,0,1,1,0,1,0,1],[1,1,1,0,0,0,1,1,1,0]))
 
 #utility method from https://stackoverflow.com/questions/10237926/convert-string-to-list-of-bits-and-viceversa
 """
@@ -122,6 +124,7 @@ def DES(bits,key):
     @return: the result of manipulating the input bits using the input key
     """ 
     def F(bitArr,keyArr):
+        print("K: {0}".format(keyArr))
         #1. expand/permutate bit array
         expandedBits = [0,0,0,0,0,0,0,0]
         for i in range(len(expandedBits)):
@@ -159,16 +162,20 @@ def DES(bits,key):
     keyBits = [0,0,0,0,0,0,0,0,0,0]
     for i in range(len(keyBits)):
         keyBits[i] = key[keyPermutation[i]-1]
+    print(keyBits)
     
     #4. split key
-    lkey = key[:5]
-    rkey = key[5:]
+    lkey = keyBits[:5]
+    rkey = keyBits[5:]
+    print("left {0} right {1}".format(lkey,rkey))
+
     
     #5. left shift key halves
     lkey.pop(0)
     lkey.append(0)
     rkey.pop(0)
     rkey.append(0)
+    print("left {0} right {1}".format(lkey,rkey))
     
     #6. recombine into 8 bit key k1
     k1 = [0,0,0,0,0,0,0,0]
@@ -176,25 +183,23 @@ def DES(bits,key):
         k1[i] = lkey[KeyPermutation8Bit[i]-1] if KeyPermutation8Bit[i]-1 < 5 else rkey[KeyPermutation8Bit[i]-1-5]
     
     #7. call F with k1, then xor with lbits
-    Fval1 = xor(F(rbits,k1),lbits); 
+    Fval1 = xor(F(rbits,k1),lbits)
     
-    #8. split k1
-    lk1 = k1[:4]
-    rk1 = k1[4:]
+    #8. left shift k1 halves
+    lkey.pop(0)
+    lkey.append(0)
+    rkey.pop(0)
+    rkey.append(0)
     
-    #9. left shift k1 halves
-    lk1.pop(0)
-    lk1.append(0)
-    rk1.pop(0)
-    rk1.append(0)
+    #9. recombine into 8 bit key k2
+    k2 = [0,0,0,0,0,0,0,0]
+    for i in range(len(k2)):
+        k2[i] = lkey[KeyPermutation8Bit[i]-1] if KeyPermutation8Bit[i]-1 < 5 else rkey[KeyPermutation8Bit[i]-1-5]
     
-    #10. recombine into 8 bit key k2
-    k2 = lk1 + rk1
-    
-    #11. call F with k2, then xor with rbits
+    #10. call F with k2, then xor with rbits
     Fval2 = xor(F(Fval1,k2),rbits);
     
-    #12. apply inverse initial permutation on the concatenation of our second result with our first result
+    #11. apply inverse initial permutation on the concatenation of our second result with our first result
     bitsFinal = [0,0,0,0,0,0,0,0]
     for i in range(len(bitsFinal)):
         bitsFinal[i] = Fval2[inverseInitialPermutation[i]-1] if inverseInitialPermutation[i]-1 < 4 else Fval1[inverseInitialPermutation[i]-1-4]

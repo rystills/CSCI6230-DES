@@ -102,7 +102,7 @@ def DES(bits,key, encrypting = True):
         xorlbits = xorbits[:4]
         xorrbits = xorbits[4:]
         
-        #4. index into s-boxes, and convert the resulting into back into binary, left-padding with a 0 if necessary
+        #4. index into s-boxes, and convert the resulting int back into binary, left-padding with a 0 if necessary
         lsbits = [int(i) for i in list(("0" + "{0:b}".format(S0[xorlbits[0]*2 + xorlbits[3]][xorlbits[1]*2 + xorlbits[2]]))[-2:])]
         rsbits = [int(i) for i in list(("0" + "{0:b}".format(S1[xorrbits[0]*2 + xorrbits[3]][xorrbits[1]*2 + xorrbits[2]]))[-2:])]
         
@@ -159,7 +159,7 @@ def DES(bits,key, encrypting = True):
     Fval1 = xor(F(rbits,k1 if encrypting else k2),lbits)
     
     #10. call F with k2, then xor with rbits
-    Fval2 = xor(F(Fval1,k2 if encrypting else k1),rbits);
+    Fval2 = xor(F(Fval1,k2 if encrypting else k1),rbits)
     
     #11. apply inverse initial permutation on the concatenation of our second result with our first result
     bitsFinal = [0,0,0,0,0,0,0,0]

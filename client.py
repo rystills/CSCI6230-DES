@@ -6,7 +6,7 @@ TCP_IP = '127.0.0.1'
 TCP_PORT = 5005
 BUFFER_SIZE = 64000
 
-fileName = input("enter name of file to send to server: ")
+fileName = input("Enter name of file to send to server: ")
 #read file contents, erroring out if file does not exist
 try:
     with open(fileName, 'r') as f:

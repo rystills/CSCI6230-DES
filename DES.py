@@ -1,60 +1,5 @@
-import sys 
-#test methods; these can be safely ignored
-def stringTest():
-    print("~string test~")
-    testString = "to be determined"
-    testKey = [0,0,1,0,1,1,0,1,0,1]
-    encrypedTest = (encrypt(tobits(testString),testKey))
-    decryptedTest = frombits(decrypt(encrypedTest,testKey))
-    print("input value:         {0}".format(testString))
-    print("input as bits:       {0}".format(tobits(testString)))
-    print("input key:           {0}".format(testKey))
-    print("encrypted bit array: {0}".format(encrypedTest))
-    print("decrypted bit array: {0}".format(decrypt(encrypedTest,testKey)))
-    print("final value:         {0}".format(decryptedTest))
-
-def bitTest():
-    print("~bit test~")
-    inBits = [1,0,1,1,0,1,0,1]
-    inKey = [1,1,1,0,0,0,1,1,1,0]
-    encrypted = encrypt(inBits,inKey)
-    print("input:     {0}".format(inBits))
-    print("key:       {0}".format(inKey))
-    print("encrypted: {0}".format(encrypted))
-    decrypted = encrypt(encrypted,inKey)
-    print("decrypted: {0}".format(decrypted))
-
-def xorTest():
-    print("~xor test~")
-    a = [1,1,1,1,1,0,0]
-    b = [1,1,0,0,1,1,0]
-    print("array a: {0}".format(a))
-    print("array b: {0}".format(b))
-    print("result:  {0}".format(xor(a,b)))
-
-def main():
-    defaultKey = [1,1,1,0,0,0,1,1,1,0]
-    #usage check
-    if (len(sys.argv) != 4) or (not sys.argv[3] in ['-e','-d']):
-        print("Usage: DES.py inFileName outFileName [options]\n\nOptions:\n-e\tencrypt\n-d\tdecrypt")
-    #read file contents, erroring out if file does not exist
-    try:
-        with open(sys.argv[1], 'r') as f:
-            data = f.read()
-            for line in f:
-                print(line)
-    except:
-        print("Error: file not found",file=sys.stderr)
-        return
-    
-    #pass data into encryption/decryption method
-    bitArray = tobits(data) if sys.argv[3] == '-e' else [int(i) for i in list(data)]
-    result = encrypt(bitArray,defaultKey) if sys.argv[3] == '-e' else frombits(decrypt(bitArray, defaultKey))
-    
-    #write result to output file
-    with open(sys.argv[2], 'w') as f:
-        for i in result:
-            f.write(str(i))
+#provide some default key; feel free to change this, as long as it remains 10 bits
+defaultKey = [1,1,1,0,0,0,1,1,1,0]
 
 #utility method from https://stackoverflow.com/questions/10237926/convert-string-to-list-of-bits-and-viceversa
 """
@@ -199,7 +144,7 @@ def DES(bits,key, encrypting = True):
     for i in range(len(k1)):
         k1[i] = lkey[KeyPermutation8Bit[i]-1] if KeyPermutation8Bit[i]-1 < 5 else rkey[KeyPermutation8Bit[i]-1-5]
     
-    #7. left shift k1 halves
+    #7. left shift key halves a second time
     lkey.pop(0)
     lkey.append(0)
     rkey.pop(0)
@@ -223,6 +168,3 @@ def DES(bits,key, encrypting = True):
     
     #done
     return bitsFinal
-
-if __name__ == "__main__":
-    main()

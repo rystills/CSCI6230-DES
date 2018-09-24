@@ -59,7 +59,6 @@ external input method for toy DES encryption
 @param bitKey: the encryption key to use
 @return: the result of encrypting the input bit array using the input key
 """ 
-
 def encrypt(bitArr,bitKey):
     encBits = []
     for i in range(0,len(bitArr),8):
@@ -131,7 +130,6 @@ def DES(bits,key, encrypting = True):
     #4. split key
     lkey = keyBits[:5]
     rkey = keyBits[5:]
-
     
     #5. left shift key halves
     lkey.pop(0)
